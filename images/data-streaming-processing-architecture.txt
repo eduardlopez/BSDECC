@@ -1,0 +1,42 @@
+                                                                              +
+                                                                              |
+                                                                              |
+                                                                              |EXTERNAL DATA STREAM
+                                                                              |(IN OUR CASE VIA HTTP GET)
+                                                                              |
+                                                                     +--------v---------+
+                                                                     |                  |
+                                                                     |  SPLIT MESSAGES  |
+                                                                     |  BY TOKEN:       |                                                  T0
+                                                                     |  "\n<br\>\n"     |                                                  TIMESTAMP
+                                                                     |                  +---------------------------------------------+->  FOR RECEIVED
+                                                                     +------+---+---+---+                                             |    PROCESSED MESSAGE
+                                                                            |   |   |                                                 |
+                                                                QUEUE 1     |   |   | QUEUE 3                                         |
+                                                +---------------------------+   |   +--------------------------+                      |
+                                                |                               |                              |                      |
+                                                |                               |                              |                      |
+                                                |                        QUEUE 2|                              |                      |
+                                                |                               |                              |                      |
+                                                |                               |                              |                      |
+                        TASK 1                  |                               |       TASK 3                 |                      | [LAG] <- T2-T0
+                        PROCESSES               |                               |       PROCESSES              |                      | CAN BE USED AS HEURISTIC
+                        HYPERVISOR              |                               |       HYPERVISOR             |                      | TO VARIATE THE PROCESSES
+                        +------------------------------------------+            |       +------------------------------------------+  | NUMBER
+                        |                       |                  |            |       |                      |                   |  |
+                        |       +-----------+---+------------+     |            |       |       +---------------------------+      |  |
+                        |       |           |                |     |            |       |       |              |            |      |  |
+                        | p1    |     p2    |         pn     |     |    TASK 2  |       | p1    |     p2       |      pn    |      |  |
+                        | +-----v---+ +-----v---+     +------v--+  |    +-------v---+   | +-----v---+ +--------v+     +-----v---+  |  |
+T1                      | |NLP      | |NLP      |     |NLP      |  |    |           |   | |PERMANENT| |PERMANENT|     |PERMANENT|  |  |
+TIMESTAMP               | |SENTIMENT| |SENTIMENT| ... |SENTIMENT|  |    |   WALLY   |   | |STORAGE  | |STORAGE  | ... |STORAGE  |  |  |    T2
+FOR EACH      <---------+ |ANALYSIS | |ANALYSIS |     |ANALYSIS |  |    |   ALERT   |   | |         | |         |     |         |  |  |    TIMESTAMP
+PROCESSED MESSAGE       | +----+----+ +----+----+     +-----+---+  |    |           |   | +------+--+ +------+--+     +------+--+  +--+--> FOR EACH
+                        |      |           |                |      |    +-----+-----+   |        |           |               |     |       PROCESSED MESSAGE
+                        +------------------------------------------+          |         +------------------------------------------+
+                               |           |                |                 |                  |           |               |
+                               v           v                v                 v                  v           v               v
+
+                                    FURTHER PROCESSING                  HTTP POST                        TO DATABASE
+                                                                        TO A FLASK APP
+
