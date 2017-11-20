@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>We've found wally!</title>
+</head>
+<body>
+    <h1>We've found wally!</h1>
+    <h3>And I need a designer</h3>
+    {% for dict_item in wallys %}
+        <h2>Message: {{dict_item['ms']}}</h2>
+        <h2>UTC time (t0): {{dict_item['t0']}}</h2>
+        <br>
+    {% endfor %}
+</body>
+</html>
